@@ -1,11 +1,11 @@
 package com.xcq1.precision.controller;
 
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.widgets.Display;
 
@@ -20,6 +20,21 @@ import com.xcq1.precision.view.Window;
  */
 public class Engine implements Observer {
 
+	/**
+	 * Maximum duration of one round. 
+	 */
+	private static final long MAX_ROUND_TIME = 180000L;
+	
+	/**
+	 * Amount of targets always present in one round.
+	 */
+	private static final int TARGET_BASE_COUNT = 10;
+	
+	/**
+	 * Amount of targets added per 15 seconds.
+	 */
+	private static final int TARGET_ADD_COUNT = 5;
+	
 	/**
 	 * Storage of the targets currently in use
 	 */
@@ -76,23 +91,47 @@ public class Engine implements Observer {
 		credits = 0;
 		shots = 0;
 		misses = 0;
+		
 		targets.clear();
+		generateTargets();
+		
 		running = true;
 	}
 	
 	/**
+	 * Generates all the targets for one round.
+	 */
+	private void generateTargets() {
+		for (int phase = 0; phase < 12; phase++) {
+			
+			long phaseTime = roundStart + phase * 15000L;
+			long randTime = 15000L - Target.FADING_TIME;
+			int targetCount = TARGET_BASE_COUNT + phase * TARGET_ADD_COUNT;
+			
+			for (int target = 0; target < targetCount; target++) {
+				long targetTime = phaseTime + (long) (randTime * Math.random());
+				targets.add(new Target(targetTime));
+			}
+		}		
+	}
+
+	/**
 	 * Called whenever action should be done.
-	 * (TODO think of a timer or something
+	 * Regularly at approximately 33 fps.
 	 */
 	public void tick() {
-		// TODO find a fancy way to add new Targets
+		if (getRoundTime() >= MAX_ROUND_TIME) {
+			running = false;
+		}
 		
 		// remove overdue targets
-		for (int i = 0; i <= targets.size(); i++) {
+		for (int i = 0; i < targets.size(); i++) {
 			if (targets.get(i).checkOverdue()) {
 				targets.remove(i);
 			}
 		}
+		
+		window.repaint();
 	}
 	
 	/**
@@ -106,7 +145,7 @@ public class Engine implements Observer {
 		boolean hitSomething = false;
 		
 		// remove hit targets & award credits
-		for (int i = 0; i <= targets.size(); i++) {
+		for (int i = 0; i < targets.size(); i++) {
 			if (targets.get(i).checkHit(x, y)) {
 				credits += 1;
 				hitSomething = true;
@@ -157,7 +196,12 @@ public class Engine implements Observer {
 		// mouse click
 		if (arg instanceof MouseEvent) {
 			MouseEvent me = (MouseEvent) arg;
-			clicked(me.getX(), me.getY());
+			
+			if (!running) {
+				newRound();
+			} else {
+				clicked(me.x, me.y);
+			}
 			
 		// paint
 		} else if (arg instanceof PaintEvent) {

@@ -12,7 +12,7 @@ public class Target {
 	/**
 	 * The time necessary to fade in and out, respectively.
 	 */
-	private static final long FADING_TIME = 4000;
+	public static final long FADING_TIME = 4000;
 	
 	/**
 	 * The maximum size the target reaches after FADING_TIME.
@@ -35,12 +35,20 @@ public class Target {
 	private boolean shot;
 	
 	/**
-	 * Creates a new target.
+	 * Creates a new target now.
 	 */
 	public Target() {
-		created = System.currentTimeMillis();
-		center.x = (int) (Math.random() * Window.SIZE);
-		center.y = (int) (Math.random() * Window.SIZE);
+		this(System.currentTimeMillis());
+	}
+	
+	/**
+	 * Creates a new target.
+	 * @created when the target will be created
+	 */
+	public Target(long created) {
+		this.created = created;
+		center = new Point((int) (Math.random() * Window.SIZE),
+						   (int) (Math.random() * Window.SIZE));
 		shot = false;
 	}
 	
@@ -59,7 +67,7 @@ public class Target {
 	protected float getSize() {
 		long exists = getExistingMillis();
 		
-		// should never happen
+		// not yet existing
 		if (exists <= 0) {		
 			return 0f;
 			
@@ -82,6 +90,11 @@ public class Target {
 	 * @param e paint event
 	 */
 	public void draw(PaintEvent e) {
+		int radius = (int) getSize();
+		if (radius == 0) {
+			return;
+		}
+		
 		Color white = new Color(e.display, 255, 255, 255);
 		Color green = new Color(e.display, 0, 0, 255);
 		
@@ -90,7 +103,6 @@ public class Target {
 		e.gc.setLineWidth(5);
 		e.gc.setAlpha(128);
 		
-		int radius = (int) getSize();
 		e.gc.drawOval(center.x - radius, center.y - radius,
 					  center.x + radius, center.y + radius);
 		

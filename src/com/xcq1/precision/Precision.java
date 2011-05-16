@@ -1,5 +1,8 @@
 package com.xcq1.precision;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import org.eclipse.swt.widgets.Display;
 
 import com.xcq1.precision.controller.Engine;
@@ -22,8 +25,15 @@ public class Precision {
 		Display display = new Display();
 		
 		// Game Engine
-		Engine engine = new Engine(display);
+		final Engine engine = new Engine(display);
 		engine.show();
+		
+		new Timer().scheduleAtFixedRate(new TimerTask() {			
+			@Override
+			public void run() {
+				engine.tick();
+			}
+		}, 0L, 30L);
 		
 		display.dispose();
 	}

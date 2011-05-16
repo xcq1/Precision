@@ -125,5 +125,9 @@ public class Window extends Observable {
 		
 		shell.setBounds(newLeft, newTop, shellSize.x, shellSize.y);
 	}
+
+	public void repaint() {
+		shell.redraw();		
+	}
 	
 }
