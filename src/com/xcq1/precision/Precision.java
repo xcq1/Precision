@@ -38,6 +38,7 @@ public class Precision {
 		
 		engine.show();
 		t.cancel();
+		t.purge();
 				
 		display.dispose();
 	}

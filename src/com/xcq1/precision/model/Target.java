@@ -124,8 +124,9 @@ public class Target {
 	public boolean checkHit(int x, int y) {
 		float deltaX = x - center.x;
 		float deltaY = y - center.y;
+		double size = getSize();
 		
-		shot |= (deltaX * deltaX + deltaY * deltaY) <= getSize();
+		shot |= (deltaX * deltaX + deltaY * deltaY) <= size * size;
 		
 		return shot;
 	}

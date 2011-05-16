@@ -106,6 +106,8 @@ public class Window extends Observable {
 				bufferGC.dispose();
 				bufferImage.dispose();
 				
+				shell.setText("Precision - " + engine.getShots());
+				
 			}
 		});		
 	}
