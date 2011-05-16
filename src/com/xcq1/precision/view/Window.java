@@ -33,10 +33,11 @@ public class Window {
 	 * Shell associated with this window
 	 */	
 	private final Shell shell;
-		
+			
 	/**
 	 * Initializes a new window
 	 * @param display
+	 * @param engine 
 	 */
 	public Window(Display display) {
 		shell = new Shell(display, SWT.DIALOG_TRIM);

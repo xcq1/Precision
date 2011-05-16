@@ -1,7 +1,13 @@
-package com.xcq1.precision.model;
+package com.xcq1.precision.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.widgets.Display;
+
+import com.xcq1.precision.model.Target;
+import com.xcq1.precision.view.Window;
 
 
 public class Engine {
@@ -32,11 +38,25 @@ public class Engine {
 	private boolean running;
 	
 	/**
-	 * Initializes a new Engine.
+	 * Current window to be displayed 
 	 */
-	public Engine() {
+	private Window window;
+	
+	/**
+	 * Initializes a new Engine.
+	 * @param display 
+	 */
+	public Engine(Display display) {
 		running = false;
-		targets = new ArrayList<Target>();
+		targets = new ArrayList<Target>();		
+		window = new Window(display);
+	}
+	
+	/**
+	 * Displays the Engine.
+	 */
+	public void show() {
+		window.show();
 	}
 	
 	/**
@@ -87,6 +107,15 @@ public class Engine {
 		
 		if (!hitSomething) {
 			misses++;
+		}
+	}
+	
+	/**
+	 * Draws all necessary stuff.
+	 */
+	public void draw(PaintEvent e) {
+		for (Target t : targets) {
+			t.draw(e);
 		}
 	}
 	

@@ -2,7 +2,7 @@ package com.xcq1.precision;
 
 import org.eclipse.swt.widgets.Display;
 
-import com.xcq1.precision.view.Window;
+import com.xcq1.precision.controller.Engine;
 
 /**
  * Main class of precision
@@ -18,10 +18,12 @@ public class Precision {
 	 */
 	public static void main(String[] args) {
 		
+		// SWT Display
 		Display display = new Display();
 		
-		Window window = new Window(display);
-		window.show();
+		// Game Engine
+		Engine engine = new Engine(display);
+		engine.show();
 		
 		display.dispose();
 	}

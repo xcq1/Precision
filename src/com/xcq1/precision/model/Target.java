@@ -2,7 +2,6 @@ package com.xcq1.precision.model;
 
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 
 import com.xcq1.precision.view.Window;
