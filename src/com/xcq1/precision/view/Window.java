@@ -8,6 +8,8 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
@@ -41,6 +43,7 @@ public class Window extends Observable {
 	/**
 	 * Engine associated with this Window
 	 */
+	@SuppressWarnings("unused")
 	private final Engine engine;
 			
 	/**
@@ -48,9 +51,9 @@ public class Window extends Observable {
 	 * @param display
 	 * @param engine 
 	 */
-	public Window(Display display, Engine engine) {
+	public Window(Display display, final Engine engine) {
 		this.engine = engine;
-		shell = new Shell(display, SWT.DIALOG_TRIM);
+		shell = new Shell(display, SWT.DIALOG_TRIM | SWT.NO_BACKGROUND);
 				
 		shell.setText("Precision");
 		shell.setSize(SIZE, SIZE);
@@ -77,23 +80,31 @@ public class Window extends Observable {
 		shell.addPaintListener(new PaintListener() {			
 			@Override
 			public void paintControl(PaintEvent e) {
+				
+				Image bufferImage = new Image(shell.getDisplay(), shell.getBounds());
+				GC bufferGC = new GC(bufferImage);
+				
 				// background = black
 				Color black = new Color(e.display, 0, 0, 0);
-				e.gc.setBackground(black);
-				e.gc.fillRectangle(e.gc.getClipping());
+				bufferGC.setBackground(black);
+				bufferGC.fillRectangle(e.gc.getClipping());
 				
 				// net of vertical & horizontal gray lines
 				Color gray = new Color(e.display, 128, 128, 128);
-				e.gc.setForeground(gray);
+				bufferGC.setForeground(gray);
 				for (int i = 0; i <= SIZE / LINE_DISTANCE; i++) {
-					e.gc.drawLine(i * LINE_DISTANCE, 0, i * LINE_DISTANCE, SIZE);
-					e.gc.drawLine(0, i * LINE_DISTANCE, SIZE, i * LINE_DISTANCE);
+					bufferGC.drawLine(i * LINE_DISTANCE, 0, i * LINE_DISTANCE, SIZE);
+					bufferGC.drawLine(0, i * LINE_DISTANCE, SIZE, i * LINE_DISTANCE);
 				}
-				
+								
 				black.dispose();
 				gray.dispose();
-				setChanged();
-				notifyObservers(e);
+				engine.draw(bufferGC, e.display);
+				
+				// play double buffer
+				e.gc.drawImage(bufferImage, 0, 0);
+				bufferGC.dispose();
+				bufferImage.dispose();
 				
 			}
 		});		
@@ -126,8 +137,19 @@ public class Window extends Observable {
 		shell.setBounds(newLeft, newTop, shellSize.x, shellSize.y);
 	}
 
+	/**
+	 * Repaints the window. Can be called from any thread.
+	 */
 	public void repaint() {
-		shell.redraw();		
+		if (shell != null) {
+			shell.getDisplay().syncExec(new Runnable() {			
+				@Override
+				public void run() {
+					shell.redraw();			
+				}
+			});
+			shell.getDisplay().wake();
+		}
 	}
 	
 }

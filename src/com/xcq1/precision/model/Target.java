@@ -1,8 +1,9 @@
 package com.xcq1.precision.model;
 
-import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Display;
 
 import com.xcq1.precision.view.Window;
 
@@ -87,24 +88,24 @@ public class Target {
 	
 	/**
 	 * Draws the target on the canvas.
-	 * @param e paint event
+	 * @param bufferGC paint event
 	 */
-	public void draw(PaintEvent e) {
+	public void draw(GC bufferGC, Display display) {
 		int radius = (int) getSize();
 		if (radius == 0) {
 			return;
 		}
 		
-		Color white = new Color(e.display, 255, 255, 255);
-		Color green = new Color(e.display, 0, 0, 255);
+		Color white = new Color(display, 255, 255, 255);
+		Color green = new Color(display, 0, 0, 255);
 		
-		e.gc.setForeground(green);
-		e.gc.setBackground(white);
-		e.gc.setLineWidth(5);
-		e.gc.setAlpha(128);
+		bufferGC.setForeground(green);
+		bufferGC.setBackground(white);
+		bufferGC.setLineWidth(5);
+		bufferGC.setAlpha(128);
 		
-		e.gc.drawOval(center.x - radius, center.y - radius,
-					  center.x + radius, center.y + radius);
+		bufferGC.fillOval(center.x - radius, center.y - radius,
+					      2 * radius, 2 * radius);
 		
 		white.dispose();
 		green.dispose();		

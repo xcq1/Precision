@@ -26,15 +26,19 @@ public class Precision {
 		
 		// Game Engine
 		final Engine engine = new Engine(display);
-		engine.show();
 		
-		new Timer().scheduleAtFixedRate(new TimerTask() {			
+		Timer t = new Timer();
+		TimerTask tt = new TimerTask() {			
 			@Override
 			public void run() {
 				engine.tick();
 			}
-		}, 0L, 30L);
+		};
+		t.scheduleAtFixedRate(tt, 0L, 30L);				
 		
+		engine.show();
+		t.cancel();
+				
 		display.dispose();
 	}
 	

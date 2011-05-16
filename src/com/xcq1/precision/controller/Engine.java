@@ -6,7 +6,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.widgets.Display;
 
 import com.xcq1.precision.model.Target;
@@ -117,9 +117,9 @@ public class Engine implements Observer {
 
 	/**
 	 * Called whenever action should be done.
-	 * Regularly at approximately 33 fps.
+	 * Regularly called from a different thread at approximately 33 fps.
 	 */
-	public void tick() {
+	public synchronized void tick() {
 		if (getRoundTime() >= MAX_ROUND_TIME) {
 			running = false;
 		}
@@ -161,9 +161,9 @@ public class Engine implements Observer {
 	/**
 	 * Draws all necessary stuff.
 	 */
-	public void draw(PaintEvent e) {
+	public void draw(GC bufferGC, Display display) {
 		for (Target t : targets) {
-			t.draw(e);
+			t.draw(bufferGC, display);
 		}
 	}
 	
@@ -202,11 +202,6 @@ public class Engine implements Observer {
 			} else {
 				clicked(me.x, me.y);
 			}
-			
-		// paint
-		} else if (arg instanceof PaintEvent) {
-			PaintEvent pe = (PaintEvent) arg;
-			draw(pe);
 		}
 	}
 	
