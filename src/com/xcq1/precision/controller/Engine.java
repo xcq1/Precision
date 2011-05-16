@@ -1,7 +1,10 @@
 package com.xcq1.precision.controller;
 
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.widgets.Display;
@@ -9,8 +12,13 @@ import org.eclipse.swt.widgets.Display;
 import com.xcq1.precision.model.Target;
 import com.xcq1.precision.view.Window;
 
-
-public class Engine {
+/**
+ * Engine of Precision. Observes the View for further changes.
+ * 
+ * @author tobias_kuhn
+ *
+ */
+public class Engine implements Observer {
 
 	/**
 	 * Storage of the targets currently in use
@@ -49,7 +57,8 @@ public class Engine {
 	public Engine(Display display) {
 		running = false;
 		targets = new ArrayList<Target>();		
-		window = new Window(display);
+		window = new Window(display, this);
+		window.addObserver(this);
 	}
 	
 	/**
@@ -91,7 +100,7 @@ public class Engine {
 	 * @param x
 	 * @param y
 	 */
-	public void clicked(int x, int y) {
+	protected void clicked(int x, int y) {
 		shots++;
 		
 		boolean hitSomething = false;
@@ -137,6 +146,24 @@ public class Engine {
 	
 	public long getRoundTime() {
 		return System.currentTimeMillis() - roundStart;
+	}
+
+	/**
+	 * All information flow from the Window to the Engine is handled
+	 * in this method.
+	 */
+	@Override
+	public void update(Observable o, Object arg) {
+		// mouse click
+		if (arg instanceof MouseEvent) {
+			MouseEvent me = (MouseEvent) arg;
+			clicked(me.getX(), me.getY());
+			
+		// paint
+		} else if (arg instanceof PaintEvent) {
+			PaintEvent pe = (PaintEvent) arg;
+			draw(pe);
+		}
 	}
 	
 }

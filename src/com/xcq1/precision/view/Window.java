@@ -1,5 +1,7 @@
 package com.xcq1.precision.view;
 
+import java.util.Observable;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
@@ -11,13 +13,15 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import com.xcq1.precision.controller.Engine;
+
 /**
- * Main window of Precision.
+ * Main window of Precision. Is observed by the Engine.
  * 
  * @author tobias_kuhn
  *
  */
-public class Window {
+public class Window extends Observable {
 	
 	/**
 	 * width & height of the window in pixels
@@ -33,13 +37,19 @@ public class Window {
 	 * Shell associated with this window
 	 */	
 	private final Shell shell;
+	
+	/**
+	 * Engine associated with this Window
+	 */
+	private final Engine engine;
 			
 	/**
 	 * Initializes a new window
 	 * @param display
 	 * @param engine 
 	 */
-	public Window(Display display) {
+	public Window(Display display, Engine engine) {
+		this.engine = engine;
 		shell = new Shell(display, SWT.DIALOG_TRIM);
 				
 		shell.setText("Precision");
@@ -55,7 +65,8 @@ public class Window {
 			
 			@Override
 			public void mouseDown(MouseEvent e) {
-				
+				setChanged();
+				notifyObservers(e);
 			}
 			
 			@Override
@@ -79,7 +90,11 @@ public class Window {
 					e.gc.drawLine(0, i * LINE_DISTANCE, SIZE, i * LINE_DISTANCE);
 				}
 				
-				e.gc.dispose();
+				black.dispose();
+				gray.dispose();
+				setChanged();
+				notifyObservers(e);
+				
 			}
 		});		
 	}
