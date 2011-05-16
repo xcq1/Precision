@@ -16,9 +16,9 @@ public class Target {
 	public static final long FADING_TIME = 4000;
 	
 	/**
-	 * The maximum size the target reaches after FADING_TIME.
+	 * The maximum radius the target reaches after FADING_TIME.
 	 */
-	private static final float MAX_SIZE = 32f;
+	private static final double MAX_RADIUS = 32f;
 
 	/**
 	 * The center of the target on screen
@@ -48,8 +48,11 @@ public class Target {
 	 */
 	public Target(long created) {
 		this.created = created;
-		center = new Point((int) (Math.random() * Window.SIZE),
-						   (int) (Math.random() * Window.SIZE));
+		
+		double centerX = MAX_RADIUS + Math.random() * (Window.SIZE - MAX_RADIUS);
+		double centerY = MAX_RADIUS + Math.random() * (Window.SIZE - MAX_RADIUS);
+		center = new Point((int) (centerX),
+						   (int) (centerY));
 		shot = false;
 	}
 	
@@ -65,7 +68,7 @@ public class Target {
 	 * Gets the size of the target.
 	 * @return the radius from center in pixels.
 	 */
-	protected float getSize() {
+	protected double getSize() {
 		long exists = getExistingMillis();
 		
 		// not yet existing
@@ -74,11 +77,11 @@ public class Target {
 			
 		// increasing in size
 		} else if (exists <= FADING_TIME) {
-			return (exists / FADING_TIME) * MAX_SIZE;
+			return (exists / (double) FADING_TIME) * MAX_RADIUS;
 			
 		// decreasing in size
 		} else if (exists <= 2 * FADING_TIME) {
-			return (1f - (exists / FADING_TIME)) * MAX_SIZE;
+			return (2f - (exists / (double) FADING_TIME)) * MAX_RADIUS;
 			
 		// overdue
 		} else {
