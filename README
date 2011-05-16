@@ -1,3 +1,6 @@
 Precision
 
-My first git-hub project that really needs a description I'm not willing to write on a sunday at 5pm.
+My first git-hub project that is a clone of an already existing web game implemented in Java.
+However I did not like various aspects of this game and thus I have created Precision.
+
+Implemented in Java SWT, this game will be my mouse quality reference application. :) 

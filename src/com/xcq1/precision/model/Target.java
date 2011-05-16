@@ -100,7 +100,7 @@ public class Target {
 		}
 		
 		Color white = new Color(display, 255, 255, 255);
-		Color green = new Color(display, 0, 0, 255);
+		Color green = new Color(display, 0, 255, 0);
 		
 		bufferGC.setForeground(green);
 		bufferGC.setBackground(white);
@@ -109,6 +109,8 @@ public class Target {
 		
 		bufferGC.fillOval(center.x - radius, center.y - radius,
 					      2 * radius, 2 * radius);
+		bufferGC.drawOval(center.x - radius, center.y - radius,
+			      2 * radius, 2 * radius);
 		
 		white.dispose();
 		green.dispose();		
