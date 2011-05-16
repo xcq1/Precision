@@ -1,6 +1,8 @@
 package com.xcq1.precision.view;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
@@ -20,7 +22,7 @@ public class Window {
 	/**
 	 * width & height of the window in pixels
 	 */
-	private final static int SIZE = 600;
+	public final static int SIZE = 600;
 	
 	/**
 	 * distance between net lines
@@ -42,7 +44,23 @@ public class Window {
 		shell.setText("Precision");
 		shell.setSize(SIZE, SIZE);
 		
-		center();	
+		center();
+		
+		shell.addMouseListener(new MouseListener() {
+			
+			@Override
+			public void mouseUp(MouseEvent e) {
+			}
+			
+			@Override
+			public void mouseDown(MouseEvent e) {
+				
+			}
+			
+			@Override
+			public void mouseDoubleClick(MouseEvent e) {				
+			}
+		});
 		
 		shell.addPaintListener(new PaintListener() {			
 			@Override
@@ -62,7 +80,7 @@ public class Window {
 				
 				e.gc.dispose();
 			}
-		});
+		});		
 	}
 	
 	/**
