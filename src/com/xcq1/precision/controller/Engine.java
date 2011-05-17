@@ -56,6 +56,11 @@ public class Engine implements Observer {
 	private int shots, misses;
 	
 	/**
+	 * Amount of overdue (and therefore lost) targets this round
+	 */
+	private int overdue;
+	
+	/**
 	 * Whether a round is currently running.
 	 */
 	private boolean running;
@@ -89,6 +94,7 @@ public class Engine implements Observer {
 	public void newRound() {
 		roundStart = System.currentTimeMillis();
 		credits = 0;
+		overdue = 0;
 		shots = 0;
 		misses = 0;
 		
@@ -120,7 +126,7 @@ public class Engine implements Observer {
 	 * Regularly called from a different thread at approximately 33 fps.
 	 */
 	public synchronized void tick() {
-		if (getRoundTime() >= MAX_ROUND_TIME) {
+		if ((getRoundTime() >= MAX_ROUND_TIME) || (overdue > 5)) {
 			running = false;
 		}
 		
@@ -128,6 +134,7 @@ public class Engine implements Observer {
 		for (int i = 0; i < targets.size(); i++) {
 			if (targets.get(i).checkOverdue()) {
 				targets.remove(i);
+				overdue++;
 			}
 		}
 		
@@ -173,6 +180,10 @@ public class Engine implements Observer {
 	
 	public int getCredits() {
 		return credits;		
+	}
+	
+	public int getOverdue() {
+		return this.overdue;
 	}
 	
 	public int getShots() {

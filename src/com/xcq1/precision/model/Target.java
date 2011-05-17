@@ -13,7 +13,7 @@ public class Target {
 	/**
 	 * The time necessary to fade in and out, respectively.
 	 */
-	public static final long FADING_TIME = 4000;
+	public static final long FADING_TIME = 3000;
 	
 	/**
 	 * The maximum radius the target reaches after FADING_TIME.
@@ -49,8 +49,8 @@ public class Target {
 	public Target(long created) {
 		this.created = created;
 		
-		double centerX = MAX_RADIUS + Math.random() * (Window.SIZE - MAX_RADIUS);
-		double centerY = MAX_RADIUS + Math.random() * (Window.SIZE - MAX_RADIUS);
+		double centerX = MAX_RADIUS + Math.random() * (Window.SIZE - 2.0 * MAX_RADIUS);
+		double centerY = MAX_RADIUS + Math.random() * (Window.SIZE - 2.0 * MAX_RADIUS);
 		center = new Point((int) (centerX),
 						   (int) (centerY));
 		shot = false;
@@ -110,7 +110,7 @@ public class Target {
 		bufferGC.fillOval(center.x - radius, center.y - radius,
 					      2 * radius, 2 * radius);
 		bufferGC.drawOval(center.x - radius, center.y - radius,
-			      2 * radius, 2 * radius);
+						  2 * radius, 2 * radius);
 		
 		white.dispose();
 		green.dispose();		

@@ -8,11 +8,14 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import com.xcq1.precision.controller.Engine;
@@ -29,6 +32,7 @@ public class Window extends Observable {
 	 * width & height of the window in pixels
 	 */
 	public final static int SIZE = 600;
+	public final static int INFO_SIZE = 200;
 	
 	/**
 	 * distance between net lines
@@ -45,6 +49,12 @@ public class Window extends Observable {
 	 */
 	@SuppressWarnings("unused")
 	private final Engine engine;
+	
+	/**
+	 * informative labels
+	 */
+	private Label roundLabel, scoreLabel, timeLabel, missedLabel,
+				  hitsLabel, overdueLabel, accuracyLabel;
 			
 	/**
 	 * Initializes a new window
@@ -56,7 +66,45 @@ public class Window extends Observable {
 		shell = new Shell(display, SWT.DIALOG_TRIM | SWT.NO_BACKGROUND);
 				
 		shell.setText("Precision");
-		shell.setSize(SIZE, SIZE);
+		shell.setSize(SIZE, SIZE + INFO_SIZE);
+		
+		GridLayout gl = new GridLayout();
+		gl.marginTop = SIZE;
+		gl.horizontalSpacing = (SIZE / 2) - 50;
+		gl.verticalSpacing = 8;
+		gl.numColumns = 2;
+		shell.setLayout(gl);
+		
+		Font f = new Font(display, "Calibri", 14, SWT.BOLD);
+		shell.setFont(f);
+		
+		roundLabel = new Label(shell, SWT.LEFT);		
+		roundLabel.setText("Round: 0");
+		roundLabel.setFont(f);
+		
+		scoreLabel = new Label(shell, SWT.LEFT);
+		scoreLabel.setText("Score: 0");
+		scoreLabel.setFont(f);
+		
+		timeLabel = new Label(shell, SWT.LEFT);
+		timeLabel.setText("Time: 0");
+		timeLabel.setFont(f);
+		
+		missedLabel = new Label(shell, SWT.LEFT);
+		missedLabel.setText("Missed: 0");
+		missedLabel.setFont(f);
+		
+		hitsLabel = new Label(shell, SWT.LEFT);
+		hitsLabel.setText("Hits: 0");
+		hitsLabel.setFont(f);
+		
+		overdueLabel = new Label(shell, SWT.LEFT);
+		overdueLabel.setText("Missed: 0");
+		overdueLabel.setFont(f);
+		
+		accuracyLabel = new Label(shell, SWT.LEFT);
+		accuracyLabel.setText("Accuracy: 0");
+		accuracyLabel.setFont(f);
 		
 		center();
 		
@@ -96,18 +144,25 @@ public class Window extends Observable {
 					bufferGC.drawLine(i * LINE_DISTANCE, 0, i * LINE_DISTANCE, SIZE);
 					bufferGC.drawLine(0, i * LINE_DISTANCE, SIZE, i * LINE_DISTANCE);
 				}
-								
+				
+				// info background = white
+				Color white = new Color(e.display, 255, 255, 255);
+				bufferGC.setBackground(white);
+				bufferGC.fillRectangle(0, SIZE, SIZE, INFO_SIZE);		
+				
+				bufferGC.setLineWidth(5);
+				bufferGC.drawRectangle(0, SIZE, SIZE, INFO_SIZE);
+							
 				black.dispose();
 				gray.dispose();
+				white.dispose();
 				engine.draw(bufferGC, e.display);
 				
 				// play double buffer
 				e.gc.drawImage(bufferImage, 0, 0);
 				bufferGC.dispose();
 				bufferImage.dispose();
-				
-				shell.setText("Precision - " + engine.getShots());
-				
+							
 			}
 		});		
 	}
