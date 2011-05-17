@@ -18,7 +18,7 @@ import com.xcq1.precision.view.Window;
  * @author tobias_kuhn
  *
  */
-public class Engine implements Observer {
+public class Engine extends Observable {
 
 	/**
 	 * Maximum duration of one round. 
@@ -34,6 +34,12 @@ public class Engine implements Observer {
 	 * Amount of targets added per 15 seconds.
 	 */
 	private static final int TARGET_ADD_COUNT = 5;
+	
+	/**
+	 * Scores rewarded for hitting / punished for missing
+	 */
+	private static final int SCORE_MISS_PUNISH = 5000;
+	private static final int SCORE_HIT_REWARD = 1000;
 	
 	/**
 	 * Storage of the targets currently in use
@@ -78,7 +84,6 @@ public class Engine implements Observer {
 		running = false;
 		targets = new ArrayList<Target>();		
 		window = new Window(display, this);
-		window.addObserver(this);
 	}
 	
 	/**
@@ -88,20 +93,9 @@ public class Engine implements Observer {
 		window.show();
 	}
 	
-	/**
-	 * Starts a new round.
-	 */
-	public void newRound() {
-		roundStart = System.currentTimeMillis();
-		credits = 0;
-		overdue = 0;
-		shots = 0;
-		misses = 0;
-		
-		targets.clear();
-		generateTargets();
-		
-		running = true;
+	protected void changedNotify() {
+		setChanged();
+		notifyObservers();
 	}
 	
 	/**
@@ -127,14 +121,16 @@ public class Engine implements Observer {
 	 */
 	public synchronized void tick() {
 		if ((getRoundTime() >= MAX_ROUND_TIME) || (overdue > 5)) {
-			running = false;
+			setRunning(false);
 		}
 		
 		// remove overdue targets
 		for (int i = 0; i < targets.size(); i++) {
 			if (targets.get(i).checkOverdue()) {
 				targets.remove(i);
+				
 				overdue++;
+				changedNotify();
 			}
 		}
 		
@@ -146,7 +142,12 @@ public class Engine implements Observer {
 	 * @param x
 	 * @param y
 	 */
-	protected void clicked(int x, int y) {
+	public void clicked(int x, int y) {
+		if (!running) {
+			setRunning(true);
+			return;
+		}
+		
 		shots++;
 		
 		boolean hitSomething = false;
@@ -154,15 +155,19 @@ public class Engine implements Observer {
 		// remove hit targets & award credits
 		for (int i = 0; i < targets.size(); i++) {
 			if (targets.get(i).checkHit(x, y)) {
-				credits += 1;
+				credits += SCORE_HIT_REWARD;
 				hitSomething = true;
 				targets.remove(i);
+				break;
 			}
 		}
 		
 		if (!hitSomething) {
 			misses++;
+			credits -= SCORE_MISS_PUNISH;
 		}
+		
+		changedNotify();
 	}
 	
 	/**
@@ -171,6 +176,34 @@ public class Engine implements Observer {
 	public void draw(GC bufferGC, Display display) {
 		for (Target t : targets) {
 			t.draw(bufferGC, display);
+		}
+	}
+	
+	/**
+	 * Set running on or off.
+	 * 
+	 * @param running true, if you want to start a new round,
+	 *                false, if you want to abort the game.
+	 */
+	protected void setRunning(boolean running) {
+		// start new round
+		if (running) {
+			roundStart = System.currentTimeMillis();
+			credits = 0;
+			overdue = 0;
+			shots = 0;
+			misses = 0;
+			changedNotify();
+			
+			targets.clear();
+			generateTargets();
+			
+			this.running = true;
+		
+		// stop game
+		} else {
+			targets.clear();
+			this.running = false;
 		}
 	}
 	
@@ -198,22 +231,4 @@ public class Engine implements Observer {
 		return System.currentTimeMillis() - roundStart;
 	}
 
-	/**
-	 * All information flow from the Window to the Engine is handled
-	 * in this method.
-	 */
-	@Override
-	public void update(Observable o, Object arg) {
-		// mouse click
-		if (arg instanceof MouseEvent) {
-			MouseEvent me = (MouseEvent) arg;
-			
-			if (!running) {
-				newRound();
-			} else {
-				clicked(me.x, me.y);
-			}
-		}
-	}
-	
 }

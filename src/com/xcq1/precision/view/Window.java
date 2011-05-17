@@ -1,6 +1,7 @@
 package com.xcq1.precision.view;
 
 import java.util.Observable;
+import java.util.Observer;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
@@ -26,13 +27,13 @@ import com.xcq1.precision.controller.Engine;
  * @author tobias_kuhn
  *
  */
-public class Window extends Observable {
+public class Window implements Observer {
 	
 	/**
 	 * width & height of the window in pixels
 	 */
 	public final static int SIZE = 600;
-	public final static int INFO_SIZE = 200;
+	public final static int INFO_SIZE = 160;
 	
 	/**
 	 * distance between net lines
@@ -63,48 +64,32 @@ public class Window extends Observable {
 	 */
 	public Window(Display display, final Engine engine) {
 		this.engine = engine;
+		this.engine.addObserver(this);
 		shell = new Shell(display, SWT.DIALOG_TRIM | SWT.NO_BACKGROUND);
 				
 		shell.setText("Precision");
 		shell.setSize(SIZE, SIZE + INFO_SIZE);
-		
-		GridLayout gl = new GridLayout();
-		gl.marginTop = SIZE;
-		gl.horizontalSpacing = (SIZE / 2) - 50;
-		gl.verticalSpacing = 8;
-		gl.numColumns = 2;
-		shell.setLayout(gl);
-		
+			
 		Font f = new Font(display, "Calibri", 14, SWT.BOLD);
 		shell.setFont(f);
 		
-		roundLabel = new Label(shell, SWT.LEFT);		
-		roundLabel.setText("Round: 0");
-		roundLabel.setFont(f);
+		final int COLUMN_WIDTH = (SIZE - 20) / 2;
 		
-		scoreLabel = new Label(shell, SWT.LEFT);
-		scoreLabel.setText("Score: 0");
-		scoreLabel.setFont(f);
+		roundLabel = setupLabel("Round: 0", f);
+		scoreLabel = setupLabel("Score: 0", f);
+		timeLabel = setupLabel("Time: 0", f);
+		missedLabel = setupLabel("Missed: 0", f);
+		hitsLabel = setupLabel("Hits: 0", f);
+		overdueLabel = setupLabel("Overdue: 0", f);
+		accuracyLabel = setupLabel("Accuracy: 0 %", f);
 		
-		timeLabel = new Label(shell, SWT.LEFT);
-		timeLabel.setText("Time: 0");
-		timeLabel.setFont(f);
-		
-		missedLabel = new Label(shell, SWT.LEFT);
-		missedLabel.setText("Missed: 0");
-		missedLabel.setFont(f);
-		
-		hitsLabel = new Label(shell, SWT.LEFT);
-		hitsLabel.setText("Hits: 0");
-		hitsLabel.setFont(f);
-		
-		overdueLabel = new Label(shell, SWT.LEFT);
-		overdueLabel.setText("Missed: 0");
-		overdueLabel.setFont(f);
-		
-		accuracyLabel = new Label(shell, SWT.LEFT);
-		accuracyLabel.setText("Accuracy: 0");
-		accuracyLabel.setFont(f);
+		placeLabel(roundLabel, 10, SIZE + 10, COLUMN_WIDTH, 20);
+		placeLabel(scoreLabel, 10, SIZE + 40, COLUMN_WIDTH, 20);
+		placeLabel(timeLabel, 10, SIZE + 70, COLUMN_WIDTH, 20);
+		placeLabel(missedLabel, 10, SIZE + 100, COLUMN_WIDTH, 20);
+		placeLabel(hitsLabel, 10 + COLUMN_WIDTH, SIZE + 10, COLUMN_WIDTH, 20);
+		placeLabel(overdueLabel, 10 + COLUMN_WIDTH, SIZE + 40, COLUMN_WIDTH, 20);
+		placeLabel(accuracyLabel, 10 + COLUMN_WIDTH, SIZE + 70, COLUMN_WIDTH, 20);
 		
 		center();
 		
@@ -116,8 +101,7 @@ public class Window extends Observable {
 			
 			@Override
 			public void mouseDown(MouseEvent e) {
-				setChanged();
-				notifyObservers(e);
+				engine.clicked(e.x, e.y);
 			}
 			
 			@Override
@@ -168,6 +152,23 @@ public class Window extends Observable {
 	}
 	
 	/**
+	 * Sets up a Label with the desired caption and font.
+	 * @param caption
+	 * @param f
+	 * @return
+	 */
+	protected Label setupLabel(String caption, Font f) {
+		Label result = new Label(shell, SWT.LEFT);
+		result.setText(caption);
+		result.setFont(f);
+		return result;
+	}
+	
+	protected void placeLabel(Label l, int x, int y, int width, int height) {
+		l.setBounds(x, y, width, height);
+	}
+	
+	/**
 	 * Shows this window and executes the MEL. 
 	 */
 	public void show() {
@@ -207,6 +208,35 @@ public class Window extends Observable {
 			});
 			shell.getDisplay().wake();
 		}
+	}
+
+	/**
+	 * All information flow from the engine to the window
+	 * must occur via the Observer pattern.
+	 */
+	@Override
+	public void update(Observable arg0, Object arg1) {	
+		shell.getDisplay().syncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+				long round = 1 + (engine.getRoundTime() / 15000);
+				int score = engine.getCredits();
+				long time = (engine.getRoundTime() / 1000);
+				int missed = engine.getMisses();
+				int hits = engine.getShots() - engine.getMisses();
+				int overdue = engine.getOverdue();
+				float accuracy = 100f * hits / (float) engine.getShots();
+				
+				roundLabel.setText("Round: " + round);
+				scoreLabel.setText("Score: " + score);
+				timeLabel.setText("Time: " + time);
+				missedLabel.setText("Missed: " + missed);
+				hitsLabel.setText("Hits: " + hits);
+				overdueLabel.setText("Overdue: " + overdue);
+				accuracyLabel.setText("Accuracy: " + accuracy);				
+			}
+		});
 	}
 	
 }
